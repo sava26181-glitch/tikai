@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TikAi — AI TikTok Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0B0B0D;--surf:#151518;--line:#26262B;--acc:#FF6A00;--acc2:#FF8A24;--tx:#fff;--tx2:#A1A1AA;--ok:#22C55E;--err:#EF4444;
+--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--tg-top:0px;--tg-bot:0px;box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:400 15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{padding-top:calc(var(--sat) + var(--tg-top));padding-bottom:calc(68px + var(--sab) + var(--tg-bot))}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:22px;letter-spacing:-.5px}.logo b{color:var(--acc)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:600;background:var(--surf);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--tx2)}
+.s-online .dot{background:var(--ok);animation:pulse 1.6s ease-in-out infinite}.s-error .dot{background:var(--err)}.s-paused .dot{background:var(--acc)}
+@keyframes pulse{50%{opacity:.35}}
+main{padding:8px 16px 16px;max-width:640px;margin:0 auto}
+.view{animation:in .18s ease-out}@keyframes in{from{opacity:0}to{opacity:1}}
+h1{font-size:26px;font-weight:800;letter-spacing:-.6px;margin:8px 0 2px}h2{font-size:13px;font-weight:600;color:var(--tx2);margin:22px 0 8px}
+.sub{color:var(--tx2);margin:0 0 14px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px 10px;min-width:0}
+.stat .n{font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--tx);line-height:1.1}.stat .l{font-size:12px;color:var(--tx2);margin-top:4px}
+.na{font-size:13px;font-weight:500;color:var(--tx2);letter-spacing:0}
+.muted{color:var(--tx2)}.small{font-size:13px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;border:0;border-radius:12px;background:var(--acc);color:#0B0B0D;font-weight:700;cursor:pointer}
+.btn:active{background:var(--acc2)}.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--tx)}.btn.danger{background:transparent;border:1px solid var(--err);color:var(--err)}
+.btn:disabled{opacity:.45}
+.seg{display:flex;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:36px;border:0;border-radius:7px;background:transparent;color:var(--tx2);font-weight:600;cursor:pointer}
+.seg button.on{background:var(--acc);color:#0B0B0D}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--surf);color:var(--tx2);font-weight:600;cursor:pointer}
+.chip.on{border-color:var(--acc);color:var(--acc)}
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.vcard{background:var(--surf);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;min-width:0;text-align:left;padding:0;display:block;width:100%}
+.cover{aspect-ratio:9/16;background:#1c1c20 center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;color:var(--tx2)}
+.cover .badge{position:absolute;top:8px;left:8px}
+.vmeta{padding:10px}.vmeta .t{font-weight:600;font-size:14px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:#000b;border:1px solid var(--line)}
+.b-published{color:var(--ok);border-color:var(--ok)}.b-failed{color:var(--err);border-color:var(--err)}.b-scheduled,.b-rendering{color:var(--acc);border-color:var(--acc)}
+.list .item{padding:10px 0;border-top:1px solid var(--line)}.list .item:first-child{border-top:0}
+.field{margin-bottom:12px}.field label{display:block;font-size:13px;color:var(--tx2);margin-bottom:6px}
+input[type=text],input[type=number],select,textarea{width:100%;min-height:44px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none}
+textarea{min-height:80px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+.sw{display:flex;align-items:center;justify-content:space-between;min-height:44px;gap:10px}
+.sw input{appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw input:checked{background:var(--acc)}.sw input:checked::after{transform:translateX(18px)}
+.lvl{display:block;width:100%;text-align:left;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer}
+.lvl.on{border-color:var(--acc)}.lvl .t{font-weight:700}
+.note{border:1px solid var(--line);border-left:3px solid var(--acc);background:var(--surf);border-radius:10px;padding:12px;margin-bottom:10px}
+.note.err{border-left-color:var(--err)}
+.skel{height:84px;border-radius:14px;background:linear-gradient(90deg,var(--surf),#1d1d21,var(--surf));background-size:200% 100%;animation:sk 1.2s linear infinite;margin-bottom:10px}
+@keyframes sk{to{background-position:-200% 0}}
+nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg);border-top:1px solid var(--line);padding-bottom:calc(var(--sab) + var(--tg-bot));z-index:5}
+nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:60px;color:var(--tx2);text-decoration:none;font-size:11px;font-weight:600}
+nav a.on{color:var(--acc)}nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(76px + var(--sab));background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px;z-index:9;text-align:center}
+svg.chart{width:100%;height:auto;display:block}
+.back{background:none;border:0;color:var(--acc);font-weight:600;min-height:44px;padding:0;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" aria-label="TikAi">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6.5 L25 16 L9 25.5 Z" fill="none" stroke="#FF6A00" stroke-width="2.4" stroke-linejoin="round"/><circle cx="9" cy="6.5" r="2.6" fill="#FF6A00"/><circle cx="25" cy="16" r="2.6" fill="#FF8A24"/><circle cx="9" cy="25.5" r="2.6" fill="#FF6A00"/></svg>
+    <span>Tik<b>Ai</b></span>
+  </div>
+  <div id="pill" class="pill"><span class="dot"></span><span id="pillt">…</span></div>
+</header>
+<main id="view"></main>
+<nav id="nav"></nav>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#0B0B0D'); tg.setBackgroundColor('#0B0B0D'); tg.setBottomBarColor && tg.setBottomBarColor('#0B0B0D'); } catch(e){} 
+  const si = () => { const c = tg.contentSafeAreaInset || {}, s = tg.safeAreaInset || {};
+    document.documentElement.style.setProperty('--tg-top', (c.top||0)+'px');
+    document.documentElement.style.setProperty('--tg-bot', (s.bottom && !('env' in window) ? s.bottom : 0)+'px'); };
+  si(); tg.onEvent && (tg.onEvent('contentSafeAreaChanged', si), tg.onEvent('safeAreaChanged', si)); }
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtN = n => n == null ? null : Intl.NumberFormat('en', {notation: n >= 10000 ? 'compact' : 'standard'}).format(n);
+const fmtD = s => s ? new Date(s).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
+const NA = '<span class="na">Not connected</span>';
+
+async function api(path, opts = {}) {
+  const r = await fetch('/api' + path, {...opts, headers: {'Content-Type':'application/json', 'Authorization':'tma ' + (tg ? tg.initData : ''), ...(opts.headers||{})}});
+  let data = null; try { data = await r.json(); } catch(e){}
+  if (!r.ok) { const d = data && data.detail; const err = new Error(typeof d === 'string' ? d : (d && d.message) || 'Request failed (' + r.status + ')'); err.status = r.status; err.blockers = d && d.blockers; throw err; }
+  return data;
+}
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+
+function setStatus(s) {
+  const st = (s || 'paused').toUpperCase(); const p = $('#pill');
+  p.className = 'pill s-' + (s || 'paused'); $('#pillt').textContent = st === 'ONLINE' ? 'AI AGENT ONLINE' : st === 'ERROR' ? 'AI AGENT ERROR' : 'AI AGENT PAUSED';
+}
+
+const ICON = {
+  dashboard: '<path d="M4 4h7v9H4zM13 4h7v5h-7zM13 11h7v9h-7zM4 15h7v5H4z"/>',
+  content: '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10.5 9.5v5l4-2.5z"/>',
+  agent: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
+  analytics: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  settings: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'
+};
+const TABS = [['dashboard','Dashboard'],['content','Content'],['agent','AI Agent'],['analytics','Analytics'],['settings','Settings']];
+$('#nav').innerHTML = TABS.map(([k,l]) => `<a href="#/${k}" data-k="${k}"><svg viewBox="0 0 24 24">${ICON[k]}</svg>${l}</a>`).join('');
+
+const skel = () => '<div class="skel"></div>'.repeat(4);
+function errorView(e, retry) {
+  const msg = e.status === 401 ? 'Open TikAi from your Telegram bot to sign in.' : e.status === 403 ? 'This Telegram account has no access to this workspace.' : e.message || 'Something went wrong.';
+  window.__retry = retry;
+  return `<div class="note err"><b>${e.status ? 'Cannot load data' : 'Server unreachable'}</b><div class="small muted" style="margin-top:4px">${esc(msg)}</div></div><button class="btn ghost" onclick="window.__retry()">Try again</button>`;
+}
+const empty = (t, d) => `<div class="card" style="text-align:center"><b>${esc(t)}</b><div class="small muted" style="margin-top:4px">${esc(d)}</div></div>`;
+
+let period = 7, filter = 'all', aperiod = 30;
+
+// ---------- views ----------
+const V = {};
+V.dashboard = async () => {
+  const d = await api('/dashboard?period=' + period); setStatus(d.agent.status);
+  const s = d.stats, task = d.agent.task;
+  const stat = (n, l) => `<div class="stat"><div class="n">${n == null ? NA : fmtN(n)}</div><div class="l">${l}</div></div>`;
+  const vi = v => `<div class="card row"><div style="min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(v.title)}</div><div class="small muted">${fmtD(v.scheduled_at || v.published_at)}</div></div><span class="badge b-${esc(v.status)}">${esc(v.status)}</span></div>`;
+  return `<h1>Your autonomous AI creator</h1>
+  <div class="card"><div class="small muted">Current task</div><div style="font-weight:600;margin-top:2px">${task ? esc(task) : 'No active task'}</div>
+    <div class="small muted" style="margin-top:12px">TikTok account</div><div style="font-weight:600;margin-top:2px">${d.tiktok.connected ? esc(d.tiktok.account || 'Connected') : 'Not connected'}</div></div>
+  <button class="btn" onclick="location.hash='#/agent'">Manage AI Agent</button>
+  <h2>Results</h2>
+  <div class="seg" style="margin-bottom:8px">${[7,30].map(p=>`<button class="${p===period?'on':''}" onclick="period=${p};route()">${p} days</button>`).join('')}</div>
+  <div class="grid3">${stat(s.published, 'Published')}${stat(s.views, 'Views')}${stat(s.followers, 'Followers')}</div>
+  ${s.available ? '' : '<div class="note small muted" style="margin-top:10px">Connect TikTok in Settings to load views and followers.</div>'}
+  <h2>Publishing queue</h2>${d.queue.length ? d.queue.map(vi).join('') : empty('Queue is empty', 'Scheduled and rendering videos appear here.')}
+  <h2>Recently published</h2>${d.recent.length ? d.recent.map(vi).join('') : empty('Nothing published yet', 'Published videos appear here.')}
+  <h2>Latest AI actions</h2>${d.actions.length ? `<div class="card list">${d.actions.map(a=>`<div class="item"><div>${esc(a.text)}</div><div class="small muted">${fmtD(a.ts)}</div></div>`).join('')}</div>` : empty('No actions yet', 'The agent log will fill as it works.')}`;
+};
+
+V.content = async () => {
+  const d = await api('/videos?status=' + filter);
+  const F = ['all','draft','rendering','scheduled','published','failed'], L = {all:'All',draft:'Drafts',rendering:'Rendering',scheduled:'Scheduled',published:'Published',failed:'Failed'};
+  const card = v => `<button class="vcard" onclick="location.hash='#/content/${v.id}'"><div class="cover" ${v.cover_url?`style="background-image:url('${esc(v.cover_url)}')"`:''}><span class="badge b-${esc(v.status)}">${esc(v.status)}</span>${v.cover_url?'':'<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 8v8l6-4z"/></svg>'}</div>
+  <div class="vmeta"><div class="t">${esc(v.title)}</div><div class="small muted">Created ${fmtD(v.created_at)}</div>${v.scheduled_at?`<div class="small muted">Posts ${fmtD(v.scheduled_at)}</div>`:''}${v.metrics&&v.metrics.views!=null?`<div class="small" style="color:var(--acc);font-weight:600">${fmtN(v.metrics.views)} views</div>`:''}</div></button>`;
+  return `<h1>Content</h1><div class="chips">${F.map(f=>`<button class="chip ${f===filter?'on':''}" onclick="filter='${f}';route()">${L[f]}</button>`).join('')}</div>
+  ${d.items.length ? `<div class="vgrid">${d.items.map(card).join('')}</div>` : empty('No videos here', 'Videos created by the agent appear in this list.')}`;
+};
+
+V.video = async id => {
+  const v = await api('/videos/' + id);
+  return `<button class="back" onclick="location.hash='#/content'">‹ Content</button><h1>${esc(v.title)}</h1><span class="badge b-${esc(v.status)}">${esc(v.status)}</span>
+  <div class="cover" style="margin:14px auto;max-width:260px;border-radius:14px;${v.cover_url?`background-image:url('${esc(v.cover_url)}')`:''}">${v.cover_url?'':'<span class="small">No preview yet</span>'}</div>
+  <div class="card small"><div class="muted">Created</div>${fmtD(v.created_at)}<div class="muted" style="margin-top:8px">Scheduled</div>${fmtD(v.scheduled_at)}<div class="muted" style="margin-top:8px">Published</div>${fmtD(v.published_at)}</div>
+  <h2>Script</h2><div class="card" style="white-space:pre-wrap">${v.script ? esc(v.script) : '<span class="muted">No script yet.</span>'}</div>
+  <h2>Description</h2><div class="card" style="white-space:pre-wrap">${v.caption ? esc(v.caption) : '<span class="muted">No description yet.</span>'}</div>
+  <h2>History</h2>${v.history.length ? `<div class="card list">${v.history.map(h=>`<div class="item"><div>${esc(h.text)}</div><div class="small muted">${fmtD(h.ts)}</div></div>`).join('')}</div>` : empty('No history', 'Operations on this video will be listed here.')}`;
+};
+
+const LVL = [['planning','Planning','The agent writes plans. You create videos.'],['production','Production','The agent creates videos on its own.'],['autonomous','Autonomous','The agent plans, creates, queues and publishes.']];
+V.agent = async () => {
+  const a = await api('/agent'); setStatus(a.status); const s = a.settings, p = s.permissions;
+  const PERM = [['publish','Publish videos'],['spend_budget','Spend budget'],['edit_queue','Edit the queue'],['reply_comments','Reply to comments']];
+  return `<h1>AI Agent</h1>
+  <button class="btn" id="tgl">${a.status === 'online' ? 'Pause agent' : 'Start agent'}</button>
+  <h2>Autonomy</h2>${LVL.map(([k,t,d])=>`<button class="lvl ${a.autonomy===k?'on':''}" data-lvl="${k}"><div class="t">${t}</div><div class="small muted">${d}</div></button>`).join('')}
+  <div id="blk"></div>
+  <h2>Strategy</h2><div class="card"><form id="f">
+   <div class="field"><label>Niche</label><input type="text" name="niche" value="${esc(s.niche)}" maxlength="200"></div>
+   <div class="field"><label>Goals</label><textarea name="goals" maxlength="1000">${esc(s.goals)}</textarea></div>
+   <div class="field"><label>Videos per week</label><input type="number" name="posts_per_week" min="0" max="50" value="${s.posts_per_week}" inputmode="numeric"></div>
+   <div class="field"><label>Monthly budget (USD)</label><input type="number" name="budget_month" min="0" step="1" value="${s.budget_month}" inputmode="decimal"></div>
+   <div class="field"><label>Content language</label><select name="language">${[['en','English'],['ru','Russian'],['es','Spanish'],['de','German'],['fr','French'],['pt','Portuguese']].map(([c,n])=>`<option value="${c}" ${s.language===c?'selected':''}>${n}</option>`).join('')}</select></div>
+   <div class="field"><label>Video style</label><textarea name="style" maxlength="500">${esc(s.style)}</textarea></div>
+   <div style="font-size:13px;color:var(--tx2);margin:4px 0">Allowed actions</div>
+   ${PERM.map(([k,l])=>`<label class="sw"><span>${l}</span><input type="checkbox" name="${k}" ${p[k]?'checked':''}></label>`).join('')}
+   <button class="btn" style="margin-top:10px" type="submit">Save settings</button></form></div>
+  <h2>Agent plans</h2>${a.plans.length ? `<div class="card list">${a.plans.map(x=>`<div class="item">${esc(x.text)}<div class="small muted">${fmtD(x.ts)}</div></div>`).join('')}</div>` : empty('No plans yet', 'Plans appear once the agent starts working.')}
+  <h2>Decision history</h2>${a.decisions.length ? `<div class="card list">${a.decisions.map(x=>`<div class="item">${esc(x.text)}<div class="small muted">${fmtD(x.ts)}</div></div>`).join('')}</div>` : empty('No decisions yet', 'Every decision the agent makes is logged here.')}`;
+};
+V.agent.bind = () => {
+  const showBlk = (msg, bl) => { $('#blk').innerHTML = `<div class="note err"><b>${esc(msg)}</b>${(bl||[]).map(b=>`<div class="small muted" style="margin-top:4px">${esc(b.label)}: ${esc(b.detail)}</div>`).join('')}</div>`; };
+  $('#tgl').onclick = async e => { e.target.disabled = true; try { const cur = $('#pillt').textContent.includes('ONLINE'); await api('/agent/status', {method:'POST', body: JSON.stringify({status: cur ? 'paused' : 'online'})}); route(); } catch(x) { showBlk(x.message, x.blockers); e.target.disabled = false; } };
+  document.querySelectorAll('.lvl').forEach(b => b.onclick = async () => { try { await api('/agent/autonomy', {method:'POST', body: JSON.stringify({level: b.dataset.lvl})}); route(); } catch(x) { showBlk(x.message, x.blockers); } });
+  $('#f').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target), g = k => f.get(k);
+    const body = {niche:g('niche'), goals:g('goals'), posts_per_week:+g('posts_per_week'), budget_month:+g('budget_month'), language:g('language'), style:g('style'),
+      permissions:{publish:f.has('publish'), spend_budget:f.has('spend_budget'), edit_queue:f.has('edit_queue'), reply_comments:f.has('reply_comments')}};
+    try { await api('/agent/settings', {method:'PUT', body: JSON.stringify(body)}); toast('Settings saved'); } catch(x) { toast(x.message); } };
+};
+
+function chart(pts, key) {
+  if (!pts.length) return '<div class="small muted" style="padding:14px 0">No data for this period yet.</div>';
+  const W = 320, H = 110, v = pts.map(p => p[key] || 0), max = Math.max(...v, 1), min = Math.min(...v);
+  const lo = key === 'followers' ? min : 0, rng = (max - lo) || 1;
+  const xy = v.map((y, i) => [pts.length > 1 ? i * (W - 8) / (pts.length - 1) + 4 : W / 2, H - 6 - (y - lo) / rng * (H - 14)]);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"><polyline fill="none" stroke="#FF6A00" stroke-width="2" stroke-linejoin="round" points="${xy.map(p=>p.join(',')).join(' ')}"/>${xy.length<=31?xy.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2" fill="#FF8A24"/>`).join(''):''}</svg>`;
+}
+V.analytics = async () => {
+  const a = await api('/analytics?period=' + aperiod);
+  const seg = `<div class="seg" style="margin-bottom:8px">${[7,30,90].map(p=>`<button class="${p===aperiod?'on':''}" onclick="aperiod=${p};route()">${p} days</button>`).join('')}</div>`;
+  if (!a.available) return `<h1>Analytics</h1><div class="note"><b>Statistics unavailable</b><div class="small muted" style="margin-top:4px">${esc(a.reason)}</div></div><button class="btn ghost" onclick="location.hash='#/settings'">Open Settings</button>`;
+  const total = a.daily.reduce((s, d) => s + (d.views || 0), 0);
+  return `<h1>Analytics</h1>${seg}
+  <div class="card"><div class="small muted">Views</div><div style="font-size:26px;font-weight:800;letter-spacing:-1px">${fmtN(total)}</div>${chart(a.daily,'views')}</div>
+  <div class="card"><div class="small muted">Followers</div>${chart(a.daily,'followers')}</div>
+  <div class="card row"><span class="muted">Videos published</span><b>${a.videos.length}</b></div>
+  <h2>Video comparison</h2>${a.videos.length ? `<div class="card list">${a.videos.map(v=>{const m=v.metrics||{};return `<div class="item"><div style="font-weight:600">${esc(v.title)}</div><div class="small muted">${m.views!=null?fmtN(m.views)+' views':'Views n/a'}${m.likes!=null?' · '+fmtN(m.likes)+' likes':''}${m.comments!=null?' · '+fmtN(m.comments)+' comments':''}${m.shares!=null?' · '+fmtN(m.shares)+' shares':''}</div></div>`}).join('')}</div>` : empty('No published videos', 'Published videos are compared here.')}
+  <h2>Experiments</h2>${a.experiments.length ? `<div class="card list">${a.experiments.map(x=>`<div class="item">${esc(x.text)}<div class="small muted">${x.result?esc(x.result):'Running'}</div></div>`).join('')}</div>` : empty('No experiments yet', 'The agent logs content experiments here.')}
+  <h2>AI insights</h2>${a.insights.length ? `<div class="card list">${a.insights.map(x=>`<div class="item">${esc(x.text)}</div>`).join('')}</div>` : empty('No insights yet', 'Insights and recommendations appear after enough data is collected.')}`;
+};
+
+const STATE = {configured:['Configured','b-published'], missing:['Not set','b-failed'], disconnected:['Disconnected','b-failed'], not_implemented:['Not available','b-scheduled']};
+V.settings = async () => {
+  const s = await api('/settings'), n = s.notifications;
+  const NT = [['published','Video published'],['failed','Publishing failed'],['budget_alert','Budget alerts'],['weekly_report','Weekly report']];
+  return `<h1>Settings</h1>
+  <h2>Integrations</h2>${s.integrations.map(i=>`<div class="card"><div class="row"><b>${esc(i.label)}</b><span class="badge ${STATE[i.state][1]}">${STATE[i.state][0]}</span></div><div class="small muted" style="margin-top:4px">${esc(i.detail)}</div>${i.state==='configured'&&i.id!=='publisher'?`<button class="btn danger" style="margin-top:10px;min-height:44px" data-dis="${i.id}">Disconnect</button>`:''}</div>`).join('')}
+  <div class="small muted">API keys live on the server and are never shown here.</div>
+  <h2>Notifications</h2><div class="card">${NT.map(([k,l])=>`<label class="sw"><span>${l}</span><input type="checkbox" data-n="${k}" ${n[k]?'checked':''}></label>`).join('')}</div>
+  <h2>Your data</h2><button class="btn ghost" id="exp">Export data</button><div style="height:8px"></div><button class="btn danger" id="del">Delete stored data</button>`;
+};
+V.settings.bind = () => {
+  document.querySelectorAll('[data-dis]').forEach(b => b.onclick = async () => { if (!confirm('Disconnect this integration? The agent will pause if it needs it.')) return; try { await api('/integrations/' + b.dataset.dis + '/disconnect', {method:'POST'}); route(); } catch(x) { toast(x.message); } });
+  document.querySelectorAll('[data-n]').forEach(c => c.onchange = async () => { const body = {}; document.querySelectorAll('[data-n]').forEach(x => body[x.dataset.n] = x.checked); try { await api('/settings/notifications', {method:'PUT', body: JSON.stringify(body)}); toast('Saved'); } catch(x) { toast(x.message); } });
+  $('#exp').onclick = async () => { try { const d = await api('/export'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], {type:'application/json'})); a.download = 'tikai-export.json'; a.click(); } catch(x) { toast(x.message); } };
+  $('#del').onclick = async () => { if (!confirm('Delete all stored videos, plans, logs and settings? This cannot be undone.')) return; try { await api('/data', {method:'DELETE'}); toast('Data deleted'); route(); } catch(x) { toast(x.message); } };
+};
+
+// ---------- router ----------
+async function route() {
+  const [, tab = 'dashboard', id] = location.hash.split('/');
+  const key = tab === 'content' && id ? 'video' : (V[tab] ? tab : 'dashboard');
+  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.k === (key === 'video' ? 'content' : key)));
+  const el = $('#view'); el.innerHTML = skel(); window.scrollTo(0, 0);
+  try { const html = await V[key](id); el.innerHTML = `<div class="view">${html}</div>`; if (V[key].bind) V[key].bind(); }
+  catch (e) { el.innerHTML = errorView(e, route); }
+}
+addEventListener('hashchange', route);
+(async () => { try { const s = await api('/agent/status'); setStatus(s.status); } catch(e) { $('#pillt').textContent = 'OFFLINE'; } route(); })();
+</script>
+</body>
+</html>
