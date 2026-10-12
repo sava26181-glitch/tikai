@@ -327,6 +327,17 @@ def delete_data(uid: int = Depends(current_user)):
             c.execute(f"DELETE FROM {t} WHERE user_id=?", (uid,))
     return {"ok": True}
 
+from fastapi.responses import FileResponse
 
-FRONT = Path(__file__).resolve().parent.parent / "frontend"
-app.mount("/", StaticFiles(directory=FRONT, html=True), name="front")
+BASE = Path(__file__).resolve().parent
+
+
+@app.get("/")
+def index():
+    return FileResponse(BASE / "index.html")
+
+
+@app.get("/logo.svg")
+def logo():
+    return FileResponse(BASE / "logo.svg")
+
